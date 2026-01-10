@@ -1,32 +1,44 @@
-FROM python:3.11-slim
+# Multi-stage build to reduce image size
+FROM python:3.11-slim as builder
 
-# Install system dependencies for dlib
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     cmake \
     build-essential \
     libopenblas-dev \
     liblapack-dev \
-    libx11-dev \
-    libgtk-3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Final stage
+FROM python:3.11-slim
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+    libopenblas0 \
+    liblapack3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy Python packages from builder
+COPY --from=builder /root/.local /root/.local
 
 # Copy application code
-COPY . .
+COPY backend ./backend
+COPY download_dlib_model.py .
 
-# Download dlib model if not present
-RUN python download_dlib_model.py || echo "Model already exists"
+# Download dlib model
+RUN python download_dlib_model.py || echo "Model download failed, will retry at runtime"
 
-# Expose port
+# Make sure scripts are in PATH
+ENV PATH=/root/.local/bin:$PATH
+
 EXPOSE 8000
 
-# Run the application
 CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
