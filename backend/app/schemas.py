@@ -23,3 +23,19 @@ class Attendance(AttendanceBase):
 
     class Config:
         orm_mode = True
+
+class AdminBase(BaseModel):
+    username: str
+
+class AdminCreate(AdminBase):
+    password: str
+
+class AdminLogin(AdminBase):
+    password: str
+
+class Admin(AdminBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

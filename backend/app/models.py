@@ -13,6 +13,14 @@ class User(Base):
     embedding = Column(Vector(512)) 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 class Attendance(Base):
     __tablename__ = "attendance"
 

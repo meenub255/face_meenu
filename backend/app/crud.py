@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 import pickle
+import hashlib
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def get_user_by_name(db: Session, name: str):
     return db.query(models.User).filter(models.User.name == name).first()
@@ -41,5 +45,18 @@ def get_attendance(db: Session, user_id: int = None, start_date = None, end_date
         query = query.filter(models.Attendance.timestamp <= end_date)
     
     return query.order_by(models.Attendance.timestamp.desc()).offset(skip).limit(limit).all()
+
+def get_admin_by_username(db: Session, username: str):
+    return db.query(models.Admin).filter(models.Admin.username == username).first()
+
+def create_admin(db: Session, admin: schemas.AdminCreate):
+    db_admin = models.Admin(
+        username=admin.username,
+        hashed_password=hash_password(admin.password)
+    )
+    db.add(db_admin)
+    db.commit()
+    db.refresh(db_admin)
+    return db_admin
 
 

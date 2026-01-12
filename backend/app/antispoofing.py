@@ -85,5 +85,27 @@ class AntiSpoofing:
             "right_ear": float(right_ear)
         }
 
+    def get_landmarks(self, image: Image.Image) -> np.ndarray:
+        """
+        Returns 68 face landmarks as numpy array.
+        """
+        if self.predictor is None:
+            return None
+            
+        gray = np.array(image.convert('L'))
+        rects = self.detector(gray, 0)
+        
+        if len(rects) == 0:
+            return None
+            
+        shape = self.predictor(gray, rects[0])
+        
+        def to_np(i):
+            p = shape.part(i)
+            return np.array([p.x, p.y])
+
+        landmarks = [to_np(i) for i in range(68)]
+        return np.array(landmarks)
+
     def check_texture_lbp(self, image: Image.Image):
          return True, 1.0, "LBP Bypassed"

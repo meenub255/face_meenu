@@ -24,9 +24,11 @@ export const registerUser = async (name, images) => {
     return response.data;
 };
 
-export const loginUser = async (image) => {
+export const loginUser = async (images) => {
     const formData = new FormData();
-    formData.append('file', image, 'login.jpg');
+    images.forEach((image, index) => {
+        formData.append('files', image, `login_${index}.jpg`);
+    });
 
     const response = await api.post('/recognize', formData, {
         headers: {
@@ -83,4 +85,30 @@ export const exportAttendance = async (filters = {}) => {
     document.body.appendChild(link);
     link.click();
     link.remove();
+};
+
+export const registerAdmin = async (username, password) => {
+    const response = await api.post('/admin/register', { username, password });
+    return response.data;
+};
+
+export const loginAdmin = async (username, password) => {
+    const response = await api.post('/admin/login', { username, password });
+    if (response.data.status === 'success') {
+        localStorage.setItem('admin', JSON.stringify(response.data));
+    }
+    return response.data;
+};
+
+export const logoutAdmin = () => {
+    localStorage.removeItem('admin');
+};
+
+export const isAdminLoggedIn = () => {
+    return localStorage.getItem('admin') !== null;
+};
+
+export const getStats = async () => {
+    const response = await api.get('/stats');
+    return response.data;
 };

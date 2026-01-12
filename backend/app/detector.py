@@ -2,6 +2,7 @@ from facenet_pytorch import MTCNN
 from PIL import Image
 import numpy as np
 from typing import List, Tuple, Union
+from skimage import transform as trans
 
 class FaceDetector:
     def __init__(self):
@@ -37,8 +38,55 @@ class FaceDetector:
 
     def detect_landmarks(self, image: Image.Image):
         """
-        Returns landmarks (leyes, reyes, nose, mouth_l, mouth_r)
+        Returns landmarks (leyes, reyes, nose, mouth_l, mouth_r) using MTCNN
         """
         boxes, probs, landmarks = self.mtcnn.detect(image, landmarks=True)
         return landmarks
+
+    def align_face(self, image: Image.Image, landmarks: np.ndarray) -> Image.Image:
+        """
+        Aligns and crops face based on 68 dlib landmarks.
+        landmarks: np.array of shape (68, 2)
+        Returns: PIL Image of size (112, 112)
+        """
+        if landmarks is None or len(landmarks) < 68:
+            return None
+
+        # Standard eye positions for 112x112 alignment
+        # Based on ArcFace/InsightFace defaults
+        dst = np.array([
+            [38.2946, 51.6963], # Left Eye
+            [73.5318, 51.5014], # Right Eye
+            [56.0252, 71.7366], # Nose
+            [41.5493, 92.3655], # Mouth Left
+            [70.7299, 92.2041]  # Mouth Right
+        ], dtype=np.float32)
+
+        # Map Dlib 68 landmarks to these 5 points
+        # Left Eye: avg of (36 to 41)
+        # Right Eye: avg of (42 to 47)
+        # Nose Tip: 30
+        # Mouth Left: 48
+        # Mouth Right: 54
+        
+        src = np.array([
+            np.mean(landmarks[36:42], axis=0),
+            np.mean(landmarks[42:48], axis=0),
+            landmarks[30],
+            landmarks[48],
+            landmarks[54]
+        ], dtype=np.float32)
+
+        tform = trans.SimilarityTransform()
+        tform.estimate(src, dst)
+        M = tform.params[0:2, :]
+        
+        # We need to apply warp to the image
+        img_np = np.array(image)
+        warped = trans.warp(img_np, tform.inverse, output_shape=(112, 112))
+        
+        # trans.warp returns floats in range [0, 1], convert back to [0, 255] uint8
+        warped = (warped * 255).astype(np.uint8)
+        
+        return Image.fromarray(warped)
 

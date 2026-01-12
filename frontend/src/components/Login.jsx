@@ -47,33 +47,36 @@ const Login = () => {
             autoLogin();
         }
         return () => clearInterval(interval);
-    }, [status, blinkCount, isBlinking]);
+    }, [status, blinkCount, isBlinking]); const autoLogin = useCallback(async () => {
+        setMessage("Capturing multi-frame samples for accuracy...");
+        setStatus('login_processing');
 
-    const autoLogin = useCallback(() => {
-        const imageSrc = webcamRef.current.getScreenshot();
-        if (imageSrc) {
-            fetch(imageSrc)
-                .then(res => res.blob())
-                .then(async (blob) => {
-                    try {
-                        const data = await loginUser(blob);
-                        if (data.status === 'success') {
-                            setStatus('success');
-                            setMessage(`Welcome, ${data.user}! Similarity: ${data.similarity.toFixed(2)}`);
-                        } else {
-                            setStatus('error');
-                            setMessage('Login failed: User not recognized.');
-                            // Allow retry after delay?
-                            setTimeout(() => {
-                                setStatus('verifying'); // Retry blink? Or just retry login?
-                                setBlinkCount(3); // Keep liveness passed
-                            }, 3000);
-                        }
-                    } catch (error) {
-                        setStatus('error');
-                        setMessage('Error: ' + (error.response?.data?.detail || error.message));
-                    }
-                });
+        const frames = [];
+        for (let i = 0; i < 5; i++) {
+            const imageSrc = webcamRef.current.getScreenshot();
+            if (imageSrc) {
+                const blob = await (await fetch(imageSrc)).blob();
+                frames.push(blob);
+            }
+            await new Promise(resolve => setTimeout(resolve, 200)); // 200ms between frames
+        }
+
+        try {
+            const data = await loginUser(frames);
+            if (data.status === 'success') {
+                setStatus('success');
+                setMessage(`Welcome, ${data.user}! Similarity: ${data.similarity.toFixed(2)}`);
+            } else {
+                setStatus('error');
+                setMessage('Login failed: User not recognized.');
+                setTimeout(() => {
+                    setStatus('verifying');
+                    setBlinkCount(3);
+                }, 3000);
+            }
+        } catch (error) {
+            setStatus('error');
+            setMessage('Error: ' + (error.response?.data?.detail || error.message));
         }
     }, [webcamRef]);
 
@@ -123,8 +126,8 @@ const Login = () => {
 
             {message && (
                 <div className={`w-full p-3 rounded-lg mb-6 text-sm font-medium text-center ${status === 'success' ? 'bg-green-500/20 text-green-200 border border-green-500/30' :
-                        status === 'error' ? 'bg-red-500/20 text-red-200 border border-red-500/30' :
-                            'bg-blue-500/20 text-blue-200'
+                    status === 'error' ? 'bg-red-500/20 text-red-200 border border-red-500/30' :
+                        'bg-blue-500/20 text-blue-200'
                     }`}>
                     {message}
                 </div>
