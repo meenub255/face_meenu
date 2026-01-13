@@ -6,7 +6,6 @@ import numpy as np
 import io
 import pickle
 from PIL import Image
-
 from . import models, schemas, crud, db, detector, edgeface, antispoofing
 
 models.Base.metadata.create_all(bind=db.engine)
