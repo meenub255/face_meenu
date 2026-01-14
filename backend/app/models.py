@@ -8,6 +8,7 @@ from geoalchemy2 import Geometry
 from .db import Base
 import datetime
 import enum
+import pytz
 
 # Enum definitions matching Postgres types
 class FacultyCategory(str, enum.Enum):
@@ -237,9 +238,18 @@ class Admin(Base):
 
 class Attendance(Base):
     __tablename__ = "attendance"
+    
+    # IST Generator
+    def get_ist_time():
+        return datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    # Snapshot user details
+    name = Column(String(255))
+    enrollment_number = Column(String(64))
+    
+    timestamp = Column(DateTime, default=get_ist_time)
 
     user = relationship("User")

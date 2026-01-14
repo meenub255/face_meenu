@@ -238,14 +238,24 @@ def get_attendance(
     
     attendance_records = crud.get_attendance(db, user_id=user_id, start_date=start_dt, end_date=end_dt, skip=skip, limit=limit)
     
-    # Join with user data
+    # Join with user data (or use snapshot)
     result = []
     for record in attendance_records:
-        user = db.query(models.User).filter(models.User.id == record.user_id).first()
+        # Fallback to join if snapshot is missing (for old records)
+        if not record.name:
+             user = db.query(models.User).filter(models.User.id == record.user_id).first()
+             name = user.name if user else "Unknown"
+             enrollment_number = user.enrollment_number if user else "N/A"
+        else:
+             name = record.name
+             enrollment_number = record.enrollment_number
+             
         result.append({
             "id": record.id,
             "user_id": record.user_id,
-            "user_name": user.name if user else "Unknown",
+            "user_name": name,
+            "student_name": name, # Compatibility
+            "enrollment_number": enrollment_number,
             "timestamp": record.timestamp.isoformat()
         })
     

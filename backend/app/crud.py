@@ -265,7 +265,14 @@ def delete_user(db: Session, user_id: int):
     return user
 
 def create_attendance(db: Session, user_id: int):
-    db_attendance = models.Attendance(user_id=user_id)
+    # Fetch user details to snapshot
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    db_attendance = models.Attendance(
+        user_id=user_id,
+        name=user.name if user else "Unknown",
+        enrollment_number=user.enrollment_number if user else None
+    )
     db.add(db_attendance)
     db.commit()
     db.refresh(db_attendance)
