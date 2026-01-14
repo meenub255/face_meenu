@@ -15,4 +15,5 @@ pgvector
 cmake
 dlib
 gunicorn
+geoalchemy2
 

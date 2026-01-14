@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
-import { loginUser, detectBlink } from '../api';
+import { recognizeStudent, detectBlink } from '../api';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
@@ -42,12 +42,14 @@ const Login = () => {
             }, 500); // Check every 500ms
         } else if (blinkCount >= 3 && status === 'verifying') {
             // Blinks complete
-            setMessage("Verification Complete. Logging in...");
+            setMessage("Verification Complete. Marking Attendance...");
             setStatus('login_processing');
             autoLogin();
         }
         return () => clearInterval(interval);
-    }, [status, blinkCount, isBlinking]); const autoLogin = useCallback(async () => {
+    }, [status, blinkCount, isBlinking]);
+
+    const autoLogin = useCallback(async () => {
         setMessage("Capturing multi-frame samples for accuracy...");
         setStatus('login_processing');
 
@@ -62,16 +64,18 @@ const Login = () => {
         }
 
         try {
-            const data = await loginUser(frames);
+            // Updated to use recognizeStudent
+            const data = await recognizeStudent(frames);
             if (data.status === 'success') {
                 setStatus('success');
-                setMessage(`Welcome, ${data.user}! Similarity: ${data.similarity.toFixed(2)}`);
+                // Backend returns: status, student, enrollment_number, similarity, session_id
+                setMessage(`Welcome, ${data.student} (${data.enrollment_number})! Attendance Marked.`);
             } else {
                 setStatus('error');
-                setMessage('Login failed: User not recognized.');
+                setMessage('Recognition failed: Student not recognized.');
                 setTimeout(() => {
                     setStatus('verifying');
-                    setBlinkCount(3);
+                    setBlinkCount(0); // Reset blinks to retry
                 }, 3000);
             }
         } catch (error) {
@@ -83,7 +87,7 @@ const Login = () => {
 
     return (
         <div className="flex flex-col items-center w-full animate-fade-in">
-            <h2 className="text-xl font-semibold mb-6 text-white text-center">Face Login</h2>
+            <h2 className="text-xl font-semibold mb-6 text-white text-center">Smart Attendance</h2>
 
             <div className="relative w-full aspect-video bg-black/50 rounded-lg overflow-hidden border-2 border-dashed border-[var(--glass-border)] mb-6 shadow-inner flex items-center justify-center">
                 <Webcam
@@ -121,7 +125,7 @@ const Login = () => {
                 disabled={blinkCount < 3 || status === 'login_processing'}
                 className={`btn-primary mb-6 flex items-center justify-center gap-2 ${blinkCount < 3 ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-                {status === 'login_processing' ? 'Authenticating...' : 'Authenticate'}
+                {status === 'login_processing' ? 'Authenticating...' : 'Mark Attendance'}
             </button>
 
             {message && (
@@ -134,7 +138,7 @@ const Login = () => {
             )}
 
             <div className="text-center w-full pt-4 border-t border-[var(--glass-border)]">
-                <span className="text-[var(--text-secondary)] text-sm">New User? </span>
+                <span className="text-[var(--text-secondary)] text-sm">New Student? </span>
                 <Link to="/register" className="text-[var(--accent-color)] hover:text-white font-medium text-sm transition-colors">
                     Register Here
                 </Link>

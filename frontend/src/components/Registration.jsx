@@ -1,11 +1,13 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
-import { registerUser, detectBlink } from '../api';
+import { registerStudent, detectBlink } from '../api';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Registration = () => {
     const webcamRef = useRef(null);
     const [name, setName] = useState('');
+    const [enrollmentNumber, setEnrollmentNumber] = useState('');
+    const [enrollmentType, setEnrollmentType] = useState('FT');
     const [images, setImages] = useState([]); // Stores blobs
     const [capturedPreviews, setCapturedPreviews] = useState([]); // Stores data URLs for preview
     const [message, setMessage] = useState('Blink 3 times to unlock capture.');
@@ -69,17 +71,22 @@ const Registration = () => {
             setStatus('error');
             return;
         }
-        if (!name.trim()) {
-            setMessage('Please enter a name.');
+        if (!name.trim() || !enrollmentNumber.trim()) {
+            setMessage('Please fill in all fields (Name and Enrollment Number).');
             setStatus('error');
             return;
         }
 
         setStatus('loading');
-        setMessage('Registering...');
+        setMessage('Registering Student...');
 
         try {
-            await registerUser(name, images);
+            await registerStudent({
+                name,
+                enrollment_number: enrollmentNumber,
+                enrollment_type: enrollmentType
+            }, images);
+
             setStatus('success');
             setMessage('Registration successful!');
             setTimeout(() => navigate('/login'), 2000);
@@ -100,17 +107,49 @@ const Registration = () => {
 
     return (
         <div className="flex flex-col items-center w-full animate-fade-in">
-            <h2 className="text-xl font-semibold mb-6 text-white text-center">Register New User</h2>
+            <h2 className="text-xl font-semibold mb-6 text-white text-center">Register New Student</h2>
 
-            <div className="w-full mb-4">
+            <div className="w-full mb-4 space-y-3">
                 <input
                     type="text"
-                    placeholder="Enter Full Name"
+                    placeholder="Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     disabled={status === 'loading'}
                     className="w-full text-center"
                 />
+
+                <input
+                    type="text"
+                    placeholder="Enrollment Number"
+                    value={enrollmentNumber}
+                    onChange={(e) => setEnrollmentNumber(e.target.value)}
+                    disabled={status === 'loading'}
+                    className="w-full text-center"
+                />
+
+                <div className="flex justify-center gap-4 text-white">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="etype"
+                            checked={enrollmentType === 'FT'}
+                            onChange={() => setEnrollmentType('FT')}
+                            className="accent-[var(--accent-color)]"
+                        />
+                        Full Time
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="etype"
+                            checked={enrollmentType === 'PT'}
+                            onChange={() => setEnrollmentType('PT')}
+                            className="accent-[var(--accent-color)]"
+                        />
+                        Part Time
+                    </label>
+                </div>
             </div>
 
             <div className="relative w-full aspect-video bg-black/50 rounded-lg overflow-hidden border-2 border-dashed border-[var(--glass-border)] mb-4 shadow-inner flex items-center justify-center group">
@@ -140,8 +179,8 @@ const Registration = () => {
                     <div
                         key={i}
                         className={`w-3 h-3 rounded-full transition-all duration-300 ${i < images.length
-                                ? 'bg-[var(--accent-color)] scale-110 shadow-[0_0_10px_var(--accent-color)]'
-                                : 'bg-gray-600'
+                            ? 'bg-[var(--accent-color)] scale-110 shadow-[0_0_10px_var(--accent-color)]'
+                            : 'bg-gray-600'
                             }`}
                     ></div>
                 ))}
@@ -179,8 +218,8 @@ const Registration = () => {
 
             {message && (
                 <div className={`w-full p-3 rounded-lg mb-6 text-sm font-medium text-center ${status === 'success' ? 'bg-green-500/20 text-green-200 border border-green-500/30' :
-                        status === 'error' ? 'bg-red-500/20 text-red-200 border border-red-500/30' :
-                            'bg-blue-500/20 text-blue-200'
+                    status === 'error' ? 'bg-red-500/20 text-red-200 border border-red-500/30' :
+                        'bg-blue-500/20 text-blue-200'
                     }`}>
                     {message}
                 </div>

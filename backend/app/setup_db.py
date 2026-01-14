@@ -21,17 +21,27 @@ def setup_database():
 
     admin_url = DATABASE_URL.replace(f"/{DB_NAME}", f"/{ADMIN_DB}")
 
-    # 1. Create database
+
+    # 1. Create database (Drop if exists)
     conn = psycopg2.connect(admin_url)
     conn.autocommit = True
     cur = conn.cursor()
 
+    # Terminate existing connections
+    cur.execute(f"""
+        SELECT pg_terminate_backend(pg_stat_activity.pid)
+        FROM pg_stat_activity
+        WHERE pg_stat_activity.datname = '{DB_NAME}'
+        AND pid <> pg_backend_pid();
+    """)
+
+    cur.execute(f'DROP DATABASE IF EXISTS "{DB_NAME}";')
     cur.execute(f'CREATE DATABASE "{DB_NAME}";')
 
     cur.close()
     conn.close()
 
-    print("Database created.")
+    print("Database recreated.")
 
     # 2. Apply schema
     print("Applying schema...")

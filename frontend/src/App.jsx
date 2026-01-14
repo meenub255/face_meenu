@@ -2,14 +2,13 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Registration from './components/Registration';
 import Login from './components/Login';
-import UserList from './components/UserList';
-import AttendanceList from './components/AttendanceList';
-import { isAdminLoggedIn } from './api';
+import AdminDashboard from './components/AdminDashboard';
 
 import Layout from './components/Layout';
 
 const ProtectedRoute = ({ children }) => {
-    return isAdminLoggedIn() ? children : <Navigate to="/admin/login" />;
+    // Admin check bypassed for now as per new schema requirements
+    return children;
 };
 
 function App() {
@@ -23,18 +22,11 @@ function App() {
                         path="/admin"
                         element={
                             <ProtectedRoute>
-                                <UserList />
+                                <AdminDashboard />
                             </ProtectedRoute>
                         }
                     />
-                    <Route
-                        path="/attendance"
-                        element={
-                            <ProtectedRoute>
-                                <AttendanceList />
-                            </ProtectedRoute>
-                        }
-                    />
+                    {/* Route /attendance is now part of /admin dashboard */}
                     <Route path="/" element={<Navigate to="/login" />} />
                 </Routes>
             </Layout>

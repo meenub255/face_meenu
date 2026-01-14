@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { getAttendance, exportAttendance, getUsers } from '../api';
+import { getAttendance, exportAttendance, getStudents } from '../api';
 import { Link } from 'react-router-dom';
 
 const AttendanceList = () => {
     const [attendance, setAttendance] = useState([]);
-    const [users, setUsers] = useState([]);
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // Filters
-    const [selectedUser, setSelectedUser] = useState('');
+    const [selectedStudent, setSelectedStudent] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
     useEffect(() => {
-        fetchUsers();
+        loadStudents();
         fetchAttendance();
     }, []);
 
-    const fetchUsers = async () => {
+    const loadStudents = async () => {
         try {
-            const data = await getUsers();
-            setUsers(data);
+            const data = await getStudents();
+            setStudents(data);
         } catch (err) {
-            console.error('Failed to fetch users', err);
+            console.error('Failed to fetch students', err);
         }
     };
 
@@ -42,7 +42,7 @@ const AttendanceList = () => {
 
     const handleFilter = () => {
         const filters = {};
-        if (selectedUser) filters.user_id = parseInt(selectedUser);
+        if (selectedStudent) filters.student_id = parseInt(selectedStudent);
         if (startDate) filters.start_date = new Date(startDate).toISOString();
         if (endDate) filters.end_date = new Date(endDate).toISOString();
 
@@ -51,7 +51,7 @@ const AttendanceList = () => {
 
     const handleExport = async () => {
         const filters = {};
-        if (selectedUser) filters.user_id = parseInt(selectedUser);
+        if (selectedStudent) filters.student_id = parseInt(selectedStudent);
         if (startDate) filters.start_date = new Date(startDate).toISOString();
         if (endDate) filters.end_date = new Date(endDate).toISOString();
 
@@ -63,7 +63,7 @@ const AttendanceList = () => {
     };
 
     const handleReset = () => {
-        setSelectedUser('');
+        setSelectedStudent('');
         setStartDate('');
         setEndDate('');
         fetchAttendance();
@@ -71,19 +71,19 @@ const AttendanceList = () => {
 
     return (
         <div className="flex flex-col items-center w-full animate-fade-in text-white">
-            <h2 className="text-xl font-semibold mb-6 text-center">Attendance Records</h2>
+            <h2 className="text-xl font-semibold mb-6 text-center">Attendance Logs</h2>
 
             {/* Filters */}
             <div className="w-full mb-6 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <select
-                        value={selectedUser}
-                        onChange={(e) => setSelectedUser(e.target.value)}
+                        value={selectedStudent}
+                        onChange={(e) => setSelectedStudent(e.target.value)}
                         className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[var(--accent-color)]"
                     >
-                        <option value="">All Users</option>
-                        {users.map(user => (
-                            <option key={user.id} value={user.id}>{user.name}</option>
+                        <option value="">All Students</option>
+                        {students.map(s => (
+                            <option key={s.student_id} value={s.student_id}>{s.name} ({s.enrollment_number})</option>
                         ))}
                     </select>
 
@@ -130,21 +130,23 @@ const AttendanceList = () => {
                         <table className="w-full text-sm">
                             <thead className="sticky top-0 bg-[var(--primary-bg)] border-b border-white/10">
                                 <tr>
-                                    <th className="text-left p-3 font-semibold">ID</th>
-                                    <th className="text-left p-3 font-semibold">User</th>
+                                    <th className="text-left p-3 font-semibold">Record ID</th>
+                                    <th className="text-left p-3 font-semibold">Student</th>
+                                    <th className="text-left p-3 font-semibold">Enrollment</th>
                                     <th className="text-left p-3 font-semibold">Date</th>
                                     <th className="text-left p-3 font-semibold">Time</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {attendance.map(record => {
-                                    const date = new Date(record.timestamp);
+                                    const date = record.timestamp ? new Date(record.timestamp) : null;
                                     return (
                                         <tr key={record.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                            <td className="p-3">{record.id}</td>
-                                            <td className="p-3 font-medium">{record.user_name}</td>
-                                            <td className="p-3">{date.toLocaleDateString()}</td>
-                                            <td className="p-3">{date.toLocaleTimeString()}</td>
+                                            <td className="p-3 text-gray-400">{record.id}</td>
+                                            <td className="p-3 font-medium text-white">{record.student_name}</td>
+                                            <td className="p-3 font-mono text-[var(--accent-color)]">{record.enrollment_number}</td>
+                                            <td className="p-3 text-gray-300">{date ? date.toLocaleDateString() : 'N/A'}</td>
+                                            <td className="p-3 text-gray-300">{date ? date.toLocaleTimeString() : 'N/A'}</td>
                                         </tr>
                                     );
                                 })}

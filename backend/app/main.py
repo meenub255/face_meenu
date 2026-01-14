@@ -46,6 +46,7 @@ async def read_image(file: UploadFile) -> Image.Image:
 @app.post("/register", response_model=schemas.User)
 async def register(
     name: str = Form(...), 
+    enrollment_number: str = Form(...),
     files: List[UploadFile] = File(...), 
     db: Session = Depends(get_db)
 ):
@@ -104,7 +105,7 @@ async def register(
         raise HTTPException(status_code=400, detail="No embeddings generated")
 
     # Save to DB
-    user_data = schemas.UserCreate(name=name)
+    user_data = schemas.UserCreate(name=name, enrollment_number=enrollment_number)
     user = crud.create_user(db, user_data, avg_embedding)
     return user
 
@@ -184,6 +185,8 @@ async def recognize(files: List[UploadFile] = File(...), db: Session = Depends(g
         crud.create_attendance(db, best_match.id)
         return {
             "status": "success",
+            "student": best_match.name,
+            "enrollment_number": best_match.enrollment_number or f"ID:{best_match.id}",
             "user": best_match.name,
             "similarity": float(max_sim)
         }
@@ -348,4 +351,27 @@ def get_stats(db: Session = Depends(get_db)):
         "daily": daily_stats,
         "peak_hours": peak_hours
     }
+
+# --- Backend Compatibility Layer for Frontend ---
+
+@app.get("/students")
+def get_students(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    # Map User objects to the structure expected by frontend (Student)
+    students = []
+    for user in users:
+        students.append({
+            "student_id": user.id,
+            "name": user.name,
+            "enrollment_number": user.enrollment_number,
+            "enrollment_type": "FT"  # Default value
+        })
+    return students
+
+@app.delete("/students/{student_id}")
+def delete_student(student_id: int, db: Session = Depends(get_db)):
+    deleted_user = crud.delete_user(db, user_id=student_id)
+    if deleted_user is None:
+         raise HTTPException(status_code=404, detail="Student not found")
+    return {"status": "success", "message": "Student deleted"}
 

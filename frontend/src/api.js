@@ -6,13 +6,18 @@ export const api = axios.create({
     baseURL: API_URL,
 });
 
-export const registerUser = async (name, images) => {
+// ----------------------------------------------------------------------
+// Student Registration & Attendance
+// ----------------------------------------------------------------------
+export const registerStudent = async (studentData, images) => {
     const formData = new FormData();
-    formData.append('name', name);
+    formData.append('name', studentData.name);
+    formData.append('enrollment_number', studentData.enrollment_number);
+    formData.append('enrollment_type', studentData.enrollment_type || 'FT');
+    if (studentData.email) formData.append('email', studentData.email);
+    if (studentData.phone) formData.append('phone', studentData.phone);
+
     images.forEach((image, index) => {
-        // images are base64 strings or blobs. better if blobs.
-        // If base64, convert to blob.
-        // Assuming the component passes Blobs or Files.
         formData.append('files', image, `image${index}.jpg`);
     });
 
@@ -24,8 +29,10 @@ export const registerUser = async (name, images) => {
     return response.data;
 };
 
-export const loginUser = async (images) => {
+export const recognizeStudent = async (images, sessionId = null) => {
     const formData = new FormData();
+    if (sessionId) formData.append('session_id', sessionId);
+
     images.forEach((image, index) => {
         formData.append('files', image, `login_${index}.jpg`);
     });
@@ -47,19 +54,19 @@ export const detectBlink = async (imageBlob) => {
     return response.data;
 };
 
-export const getUsers = async () => {
-    const response = await api.get('/users');
+export const getStudents = async () => {
+    const response = await api.get('/students');
     return response.data;
 };
 
-export const deleteUser = async (userId) => {
-    const response = await api.delete(`/users/${userId}`);
+export const deleteStudent = async (studentId) => {
+    const response = await api.delete(`/students/${studentId}`);
     return response.data;
 };
 
 export const getAttendance = async (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.user_id) params.append('user_id', filters.user_id);
+    if (filters.student_id) params.append('student_id', filters.student_id);
     if (filters.start_date) params.append('start_date', filters.start_date);
     if (filters.end_date) params.append('end_date', filters.end_date);
 
@@ -69,7 +76,7 @@ export const getAttendance = async (filters = {}) => {
 
 export const exportAttendance = async (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.user_id) params.append('user_id', filters.user_id);
+    if (filters.student_id) params.append('student_id', filters.student_id);
     if (filters.start_date) params.append('start_date', filters.start_date);
     if (filters.end_date) params.append('end_date', filters.end_date);
 
@@ -77,27 +84,63 @@ export const exportAttendance = async (filters = {}) => {
         responseType: 'blob'
     });
 
-    // Trigger download
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'attendance.csv');
+    link.setAttribute('download', 'attendance.xlsx');
     document.body.appendChild(link);
     link.click();
     link.remove();
 };
 
-export const registerAdmin = async (username, password) => {
-    const response = await api.post('/admin/register', { username, password });
+export const getStats = async () => {
+    const response = await api.get('/stats');
     return response.data;
 };
 
+// ----------------------------------------------------------------------
+// Admin CRUD Operations
+// ----------------------------------------------------------------------
+
+// Departments
+export const getDepartments = async () => (await api.get('/admin/departments')).data;
+export const createDepartment = async (data) => (await api.post('/admin/departments', data)).data;
+export const deleteDepartment = async (id) => (await api.delete(`/admin/departments/${id}`)).data;
+
+// Programs
+export const getPrograms = async () => (await api.get('/admin/programs')).data;
+export const createProgram = async (data) => (await api.post('/admin/programs', data)).data;
+export const deleteProgram = async (id) => (await api.delete(`/admin/programs/${id}`)).data;
+
+// Subjects
+export const getSubjects = async () => (await api.get('/admin/subjects')).data;
+export const createSubject = async (data) => (await api.post('/admin/subjects', data)).data;
+export const deleteSubject = async (id) => (await api.delete(`/admin/subjects/${id}`)).data;
+
+// Locations
+export const getLocations = async () => (await api.get('/admin/locations')).data;
+export const createLocation = async (data) => (await api.post('/admin/locations', data)).data;
+export const deleteLocation = async (id) => (await api.delete(`/admin/locations/${id}`)).data;
+
+// Faculty
+export const getFaculty = async () => (await api.get('/admin/faculty')).data;
+export const createFaculty = async (data) => (await api.post('/admin/faculty', data)).data;
+export const deleteFaculty = async (id) => (await api.delete(`/admin/faculty/${id}`)).data;
+
+// Course Offerings
+export const getOfferings = async () => (await api.get('/admin/offerings')).data;
+export const createOffering = async (data) => (await api.post('/admin/offerings', data)).data;
+export const deleteOffering = async (id) => (await api.delete(`/admin/offerings/${id}`)).data;
+
+
+// Admin Auth Stub
 export const loginAdmin = async (username, password) => {
-    const response = await api.post('/admin/login', { username, password });
-    if (response.data.status === 'success') {
-        localStorage.setItem('admin', JSON.stringify(response.data));
+    if (username === 'admin' && password === 'admin') {
+        const fakeUser = { status: 'success', username: 'admin' };
+        localStorage.setItem('admin', JSON.stringify(fakeUser));
+        return fakeUser;
     }
-    return response.data;
+    return { status: 'error', detail: 'Invalid credentials (use admin/admin)' };
 };
 
 export const logoutAdmin = () => {
@@ -106,9 +149,4 @@ export const logoutAdmin = () => {
 
 export const isAdminLoggedIn = () => {
     return localStorage.getItem('admin') !== null;
-};
-
-export const getStats = async () => {
-    const response = await api.get('/stats');
-    return response.data;
 };

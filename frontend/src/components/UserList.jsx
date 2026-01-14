@@ -1,75 +1,87 @@
 import React, { useEffect, useState } from 'react';
-import { getUsers, deleteUser } from '../api';
-import { Link } from 'react-router-dom';
+import { getStudents, deleteStudent } from '../api';
 
 const UserList = () => {
-    const [users, setUsers] = useState([]);
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchUsers();
+        loadStudents();
     }, []);
 
-    const fetchUsers = async () => {
+    const loadStudents = async () => {
         try {
-            const data = await getUsers();
-            setUsers(data);
-        } catch (err) {
-            setError('Failed to fetch users');
+            const data = await getStudents();
+            setStudents(data);
+        } catch (error) {
+            console.error("Failed to load students", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
+        if (window.confirm("Are you sure you want to delete this student?")) {
             try {
-                await deleteUser(id);
-                setUsers(users.filter(user => user.id !== id));
-            } catch (err) {
-                alert('Failed to delete user');
+                await deleteStudent(id);
+                setStudents(students.filter(s => s.student_id !== id));
+            } catch (error) {
+                console.error("Failed to delete student", error);
             }
         }
     };
 
     return (
-        <div className="flex flex-col items-center w-full animate-fade-in text-white">
-            <h2 className="text-xl font-semibold mb-6 text-center">Admin: User Management</h2>
+        <div className="w-full max-w-4xl mx-auto animate-fade-in">
+            <h2 className="text-2xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                Registered Students
+            </h2>
 
-            {loading ? (
-                <div className="text-center p-4">Loading users...</div>
-            ) : error ? (
-                <div className="text-red-400 p-4">{error}</div>
-            ) : (
-                <div className="w-full max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                    {users.length === 0 ? (
-                        <p className="text-center text-gray-400">No users found.</p>
-                    ) : (
-                        <div className="space-y-3">
-                            {users.map(user => (
-                                <div key={user.id} className="flex justify-between items-center bg-white/5 p-4 rounded-lg border border-white/10 hover:border-[var(--accent-color)] transition-colors">
-                                    <div className="flex flex-col">
-                                        <span className="font-medium text-lg">{user.name}</span>
-                                        <span className="text-xs text-gray-400">ID: {user.id} • Registered: {new Date(user.created_at).toLocaleDateString()}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => handleDelete(user.id)}
-                                        className="px-3 py-1 bg-red-500/20 text-red-300 border border-red-500/30 rounded hover:bg-red-500/40 transition-colors text-sm"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <div className="text-center w-full pt-6 mt-4 border-t border-[var(--glass-border)]">
-                <Link to="/login" className="text-[var(--accent-color)] hover:text-white font-medium text-sm transition-colors">
-                    Back to Login
-                </Link>
+            <div className="glass-panel overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-white/5 border-b border-white/10 uppercase text-xs tracking-wider text-gray-300">
+                        <tr>
+                            <th className="p-4">ID</th>
+                            <th className="p-4">Enrollment No.</th>
+                            <th className="p-4">Name</th>
+                            <th className="p-4">Type</th>
+                            <th className="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {loading ? (
+                            <tr>
+                                <td colSpan="5" className="p-8 text-center text-gray-400">Loading...</td>
+                            </tr>
+                        ) : students.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" className="p-8 text-center text-gray-400">No students found.</td>
+                            </tr>
+                        ) : (
+                            students.map((student) => (
+                                <tr key={student.student_id} className="hover:bg-white/5 transition-colors">
+                                    <td className="p-4 text-gray-300">{student.student_id}</td>
+                                    <td className="p-4 font-mono text-[var(--accent-color)]">{student.enrollment_number}</td>
+                                    <td className="p-4 font-medium text-white">{student.name}</td>
+                                    <td className="p-4 text-gray-300 relative">
+                                        <span className={`px-2 py-1 rounded text-xs ${student.enrollment_type === 'FT' ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
+                                            }`}>
+                                            {student.enrollment_type === 'FT' ? 'Full Time' : 'Part Time'}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <button
+                                            onClick={() => handleDelete(student.student_id)}
+                                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 px-3 py-1 rounded transition-colors text-sm"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
