@@ -61,14 +61,25 @@ const ProgramManager = () => {
             {subTab === 'programs' && (
                 <div className="glass-panel p-6">
                     <h3 className="text-lg font-bold mb-4">Manage Programs</h3>
-                    <form onSubmit={handleCreateProgram} className="flex gap-4 mb-6">
-                        <input type="text" placeholder="Name" value={newProgram.name} onChange={e => setNewProgram({ ...newProgram, name: e.target.value })} className="flex-1 input-field" required />
-                        <input type="text" placeholder="Code" value={newProgram.code} onChange={e => setNewProgram({ ...newProgram, code: e.target.value })} className="w-32 input-field" required />
-                        <select value={newProgram.dept_id} onChange={e => setNewProgram({ ...newProgram, dept_id: e.target.value })} className="input-field text-white" required>
-                            <option value="" className="text-black">Select Dept</option>
-                            {departments.map(d => <option key={d.dept_id || d.department_id} value={d.dept_id || d.department_id} className="text-black">{d.code}</option>)}
-                        </select>
-                        <button type="submit" className="btn-primary">Add</button>
+                    <form onSubmit={handleCreateProgram} className="mb-8 bg-white/5 p-6 rounded-xl border border-white/10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Program Name</label>
+                                <input type="text" placeholder="e.g. B.Tech CSE" value={newProgram.name} onChange={e => setNewProgram({ ...newProgram, name: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Program Code</label>
+                                <input type="text" placeholder="e.g. BT-CSE" value={newProgram.code} onChange={e => setNewProgram({ ...newProgram, code: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Department</label>
+                                <select value={newProgram.dept_id} onChange={e => setNewProgram({ ...newProgram, dept_id: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" required>
+                                    <option value="" className="text-gray-500">Select Department</option>
+                                    {departments.map(d => <option key={d.dept_id || d.department_id} value={d.dept_id || d.department_id} className="text-black">{d.code} - {d.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" className="btn-primary w-full md:w-auto px-8">Add Program</button>
                     </form>
 
                     <div className="overflow-x-auto">
@@ -91,15 +102,29 @@ const ProgramManager = () => {
             {subTab === 'subjects' && (
                 <div className="glass-panel p-6">
                     <h3 className="text-lg font-bold mb-4">Manage Subjects</h3>
-                    <form onSubmit={handleCreateSubject} className="flex gap-4 mb-6 flex-wrap">
-                        <input type="text" placeholder="Name" value={newSubject.name} onChange={e => setNewSubject({ ...newSubject, name: e.target.value })} className="flex-1 input-field" required />
-                        <input type="text" placeholder="Code" value={newSubject.code} onChange={e => setNewSubject({ ...newSubject, code: e.target.value })} className="w-32 input-field" required />
-                        <select value={newSubject.dept_id} onChange={e => setNewSubject({ ...newSubject, dept_id: e.target.value })} className="input-field text-white" required>
-                            <option value="" className="text-black">Select Dept</option>
-                            {departments.map(d => <option key={d.dept_id || d.department_id} value={d.dept_id || d.department_id} className="text-black">{d.code}</option>)}
-                        </select>
-                        <input type="number" placeholder="Sem" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: e.target.value })} className="w-20 input-field" />
-                        <button type="submit" className="btn-primary">Add</button>
+                    <form onSubmit={handleCreateSubject} className="mb-8 bg-white/5 p-6 rounded-xl border border-white/10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-4">
+                            <div className="lg:col-span-2">
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Subject Name</label>
+                                <input type="text" placeholder="e.g. Data Structures" value={newSubject.name} onChange={e => setNewSubject({ ...newSubject, name: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Subject Code</label>
+                                <input type="text" placeholder="e.g. CS101" value={newSubject.code} onChange={e => setNewSubject({ ...newSubject, code: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Department</label>
+                                <select value={newSubject.dept_id} onChange={e => setNewSubject({ ...newSubject, dept_id: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" required>
+                                    <option value="" className="text-gray-500">Select Dept</option>
+                                    {departments.map(d => <option key={d.dept_id || d.department_id} value={d.dept_id || d.department_id} className="text-black">{d.code}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Semester</label>
+                                <input type="number" placeholder="1" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: e.target.value })} className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white" />
+                            </div>
+                        </div>
+                        <button type="submit" className="btn-primary w-full md:w-auto px-8">Add Subject</button>
                     </form>
 
                     <div className="overflow-x-auto">
@@ -120,18 +145,7 @@ const ProgramManager = () => {
                 </div>
             )}
 
-            <style>{`
-                .input-field {
-                    padding: 0.5rem 1rem;
-                    background-color: rgba(255, 255, 255, 0.05);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    border-radius: 0.5rem;
-                    outline: none;
-                }
-                .input-field:focus {
-                    border-color: var(--accent-color);
-                }
-            `}</style>
+
         </div>
     );
 };

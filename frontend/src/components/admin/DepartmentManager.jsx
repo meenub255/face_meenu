@@ -48,24 +48,32 @@ const DepartmentManager = () => {
             <h2 className="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Manage Departments</h2>
 
             {/* Create Form */}
-            <form onSubmit={handleCreate} className="flex gap-4 mb-8">
-                <input
-                    type="text"
-                    placeholder="Department Name"
-                    value={newItem.name}
-                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none"
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Dept Code (e.g. CSE)"
-                    value={newItem.code}
-                    onChange={(e) => setNewItem({ ...newItem, code: e.target.value })}
-                    className="w-48 px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none"
-                    required
-                />
-                <button type="submit" className="btn-primary">Add Department</button>
+            <form onSubmit={handleCreate} className="mb-8 bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">Department Name</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Computer Science"
+                            value={newItem.name}
+                            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">Department Code</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. CSE"
+                            value={newItem.code}
+                            onChange={(e) => setNewItem({ ...newItem, code: e.target.value })}
+                            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white"
+                            required
+                        />
+                    </div>
+                </div>
+                <button type="submit" className="btn-primary w-full md:w-auto px-8">Add Department</button>
             </form>
 
             {/* List */}

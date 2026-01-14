@@ -12,6 +12,10 @@ const Layout = ({ children }) => {
         navigate('/admin/login');
     };
 
+    // Determine width based on route
+    const isWidePage = location.pathname.includes('/admin') || location.pathname.includes('/attendance');
+    const containerClass = isWidePage ? "max-w-7xl" : "max-w-md";
+
     return (
         <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
             {/* Dynamic Background */}
@@ -23,18 +27,18 @@ const Layout = ({ children }) => {
 
             {/* Admin Bar */}
             {loggedIn && (
-                <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-50 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-full text-xs animate-fade-in shadow-lg">
-                    <div className="flex gap-4">
-                        <button onClick={() => navigate('/admin/dashboard')} className={`hover:text-white transition-colors py-1 px-3 rounded-full ${location.pathname === '/admin/dashboard' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-[var(--text-secondary)]'}`}>Dashboard</button>
-                        <button onClick={() => navigate('/admin')} className={`hover:text-white transition-colors py-1 px-3 rounded-full ${location.pathname === '/admin' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-[var(--text-secondary)]'}`}>Users</button>
-                        <button onClick={() => navigate('/attendance')} className={`hover:text-white transition-colors py-1 px-3 rounded-full ${location.pathname === '/attendance' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-[var(--text-secondary)]'}`}>Attendance</button>
+                <div className="absolute top-4 left-4 right-4 flex flex-col md:flex-row justify-between items-center z-50 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl md:rounded-full text-xs animate-fade-in shadow-lg gap-2">
+                    <div className="flex gap-2 md:gap-4 overflow-x-auto w-full md:w-auto justify-center md:justify-start">
+                        <button onClick={() => navigate('/admin/dashboard')} className={`hover:text-white transition-colors py-1 px-3 rounded-full whitespace-nowrap ${location.pathname === '/admin/dashboard' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-[var(--text-secondary)]'}`}>Dashboard</button>
+                        <button onClick={() => navigate('/admin')} className={`hover:text-white transition-colors py-1 px-3 rounded-full whitespace-nowrap ${location.pathname === '/admin' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-[var(--text-secondary)]'}`}>Users</button>
+                        <button onClick={() => navigate('/attendance')} className={`hover:text-white transition-colors py-1 px-3 rounded-full whitespace-nowrap ${location.pathname === '/attendance' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-[var(--text-secondary)]'}`}>Attendance</button>
                     </div>
-                    <button onClick={handleLogout} className="text-red-400 hover:text-red-300 transition-colors font-bold px-3">Logout</button>
+                    <button onClick={handleLogout} className="text-red-400 hover:text-red-300 transition-colors font-bold px-3 py-1">Logout</button>
                 </div>
             )}
 
             {/* Glass Container */}
-            <div className="glass-panel w-full max-w-md p-8 animate-fade-in relative z-10">
+            <div className={`glass-panel w-full ${containerClass} p-8 animate-fade-in relative z-10 transition-all duration-500`}>
                 <header className="mb-8 text-center flex flex-col items-center">
                     <img src={logo} alt="University Logo" className="h-16 mb-4 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform hover:scale-105" />
                     <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-[var(--accent-color)] bg-clip-text text-transparent">

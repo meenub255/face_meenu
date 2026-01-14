@@ -37,7 +37,7 @@ const UserList = () => {
                 Registered Students
             </h2>
 
-            <div className="glass-panel overflow-hidden">
+            <div className="glass-panel overflow-hidden overflow-x-auto">
                 <table className="w-full text-left">
                     <thead className="bg-white/5 border-b border-white/10 uppercase text-xs tracking-wider text-gray-300">
                         <tr>

@@ -123,7 +123,7 @@ const AttendanceList = () => {
             ) : error ? (
                 <div className="text-red-400 p-4">{error}</div>
             ) : (
-                <div className="w-full max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="w-full max-h-[50vh] overflow-y-auto overflow-x-auto pr-2 custom-scrollbar">
                     {attendance.length === 0 ? (
                         <p className="text-center text-gray-400">No attendance records found.</p>
                     ) : (

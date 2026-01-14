@@ -47,31 +47,42 @@ const LocationManager = () => {
         <div className="glass-panel p-6">
             <h2 className="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Manage Locations</h2>
 
-            <form onSubmit={handleCreate} className="flex gap-4 mb-8">
-                <input
-                    type="text"
-                    placeholder="Room Name/Number"
-                    value={newItem.name}
-                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none"
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Building"
-                    value={newItem.building}
-                    onChange={(e) => setNewItem({ ...newItem, building: e.target.value })}
-                    className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none"
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Floor"
-                    value={newItem.floor}
-                    onChange={(e) => setNewItem({ ...newItem, floor: e.target.value })}
-                    className="w-24 px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none"
-                />
-                <button type="submit" className="btn-primary">Add</button>
+            <form onSubmit={handleCreate} className="mb-8 bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">Room Name/Number</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Lab 101"
+                            value={newItem.name}
+                            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">Building Name</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Science Block"
+                            value={newItem.building}
+                            onChange={(e) => setNewItem({ ...newItem, building: e.target.value })}
+                            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">Floor Number</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. 1"
+                            value={newItem.floor}
+                            onChange={(e) => setNewItem({ ...newItem, floor: e.target.value })}
+                            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:border-[var(--accent-color)] outline-none text-white"
+                        />
+                    </div>
+                </div>
+                <button type="submit" className="btn-primary w-full md:w-auto px-8">Add Location</button>
             </form>
 
             {loading ? <div>Loading...</div> : (
